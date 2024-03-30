@@ -33,31 +33,31 @@ def __main__():
   navigate_to_followers(driver)
 
   followers_css = "[href*=\"" + username + "/followers/\"]"
-  total_follower_count = WebDriverWait(driver, 20).until(
+  total_follower_count = WebDriverWait(driver, 10).until(
     EC.element_to_be_clickable((By.CSS_SELECTOR, "[href*=\"" + username + "/followers/\"]"))
   )
-  print(total_follow_count.text + " total followers.")
+  print(total_follower_count.text + " total followers.")
 
   css_select_close = '[aria-label="Close"]'
-  
+
   following_css =  "[href*=\"" + username + "/following/\"]"
-  total_following_count = WebDriverWait(driver, 20).until(
+  total_following_count = WebDriverWait(driver, 10).until(
     EC.element_to_be_clickable((By.CSS_SELECTOR, "[href*=\"" + username + "/following/\"]"))
   )
-  print(total_follow_count.text + " total followers.")
+  print(total_following_count.text + " total following.")
 
   click_button_with_css(driver, followers_css)
   followers_list = get_usernames_from_dialog(driver, total_follower_count)
 
-  click_button_with_css(driver, css_select_close)
-  time.sleep(1)
+  # click_button_with_css(driver, css_select_close)
+  # time.sleep(1)
 
-  click_button_with_css(driver, following_css)
-  following_list = get_usernames_from_dialog(driver, total_following_count)
+  # click_button_with_css(driver, following_css)
+  # following_list = get_usernames_from_dialog(driver, total_following_count)
 
-  no_followbacks = no_followback(followers, following)
-  for i in no_followbacks:
-    print(i)
+  # no_followbacks = no_followback(followers_list, following_list)
+  # for i in no_followbacks:
+  #   print(i)
 
 def no_followback(followers, following):
   followers.sort()
@@ -70,27 +70,29 @@ def no_followback(followers, following):
       no_followback_list += [following[i]]
   return no_followback_list
 
-def get_usernames_from_dialog(driver):
-  list_xpath = "//div[@role='dialog']//li"
-  print("attempting EC xpath")
+def get_usernames_from_dialog(driver, end_count):
+  # list_xpath = "//div[@role='dialog']//li"
+  # print("attempting EC xpath")
 
-  time.sleep(3)
-  # scroll_down(driver)
+  # time.sleep(3)
+  # # scroll_down(driver)
 
-  class_name = "x1dm5mii"
-  list_elems = driver.find_elements(By.CLASS_NAME, class_name)
-  time.sleep(1)
+  # class_name = "x1dm5mii"
+  # list_elems = driver.find_elements(By.CLASS_NAME, class_name)
+  # time.sleep(1)
 
-  users = []
-  for i in range(len(list_elems)):
-    try:
-      row_text = list_elems[i].text
-      username = row_text[0:row_text.index("\n")]
-      users += [username]
-    except:
-      print("continue")
+  scroll_within_dialog_until_no_more_elements(driver)
 
-  return users
+  # users = []
+  # for i in range(len(list_elems)):
+  #   try:
+  #     row_text = list_elems[i].text
+  #     username = row_text[0:row_text.index("\n")]
+  #     users += [username]
+  #   except:
+  #     print("continue")
+
+  # return users
 
 def check_difference_in_count(driver):
   global count
@@ -101,6 +103,22 @@ def check_difference_in_count(driver):
     return True
   else: 
     return False
+
+def scroll_within_dialog_until_no_more_elements(driver):
+    dialog_element = WebDriverWait(driver, 30).until(EC.visibility_of_element_located((By.CSS_SELECTOR, "[role='dialog']")))
+    previous_height = driver.execute_script("return arguments[0].scrollHeight;", dialog_element)
+    while True:
+        # Scroll down within the dialog box
+        driver.execute_script("arguments[0].scrollTop = arguments[0].scrollHeight;", dialog_element)
+        # Wait for a short period to load more content (adjust as needed)
+        driver.implicitly_wait(5)
+        # Calculate new scroll height
+        new_height = driver.execute_script("return arguments[0].scrollHeight;", dialog_element)
+        # Check if scroll height has not changed (no more content to load)
+        if new_height == previous_height:
+            print("breaking")
+            break
+        previous_height = new_height
 
 def scroll_down(driver):
   global count
