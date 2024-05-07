@@ -6,7 +6,7 @@ from selenium.webdriver.common.by import By
 import time
 
 username = 'eric.mxrtin'
-password = 'love2Run'
+password = ''
 count = 0
 
 def login(driver):
